@@ -6,13 +6,14 @@ import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.R
 import com.astitva.librarysystem.A.Simple.Library.Management.System.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,15 +22,18 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
     private final ModelMapper modelMapper;
-
-    public boolean isExistsById(Long id) {
-        boolean exists = authorRepository.existsById(id);
-        if(!exists) throw new ResourceNotFoundException("Author not found with id "+id);
-        return true;
-    }
+    private final int PAGE_SIZE = 10;
 
     public AuthorEntity findByAuthorId(Long id) {
+        boolean exists = authorRepository.existsById(id);
+        if(!exists) throw new ResourceNotFoundException("Author not found with id "+id);
         return authorRepository.findById(id).get();
+    }
+
+    public Pageable getPageableAndSorting(String sortBy, Integer pageNumber) {
+        return PageRequest.of(pageNumber,
+                PAGE_SIZE,
+                Sort.by(Sort.Order.asc(sortBy)));
     }
 
     public AuthorDTO createNewAuthor(AuthorDTO inputAuthor) {
@@ -38,8 +42,9 @@ public class AuthorService {
         return modelMapper.map(savedAuthorEntity, AuthorDTO.class);
     }
 
-    public List<AuthorDTO> getAllAuthors() {
-        List<AuthorEntity> authorEntities = authorRepository.findAll();
+    public List<AuthorDTO> getAllAuthors(String sortBy, Integer pageNumber) {
+        Pageable pageable = getPageableAndSorting(sortBy, pageNumber);
+        List<AuthorEntity> authorEntities = authorRepository.findAll(pageable).getContent();
         return authorEntities
                 .stream()
                 .map(authorEntity -> modelMapper.map(authorEntity, AuthorDTO.class))
@@ -47,19 +52,17 @@ public class AuthorService {
     }
 
     public AuthorDTO getAuthorById(Long id) {
-        isExistsById(id);
         AuthorEntity authorEntity = findByAuthorId(id);
         return modelMapper.map(authorEntity, AuthorDTO.class);
     }
 
     public boolean deleteAuthorById(Long id) {
-        isExistsById(id);
+        findByAuthorId(id);
         authorRepository.deleteById(id);
         return true;
     }
 
     public AuthorDTO updateAuthorById(Map<String, Object> updates, Long id) {
-        isExistsById(id);
         AuthorEntity authorEntity = findByAuthorId(id);
         updates.forEach((field, value) -> {
             Field field1 = ReflectionUtils.findField(AuthorEntity.class, field);

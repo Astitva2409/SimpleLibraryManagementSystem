@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Setter
@@ -19,6 +18,9 @@ public class BookDTO {
     @NotBlank(message = "The name cannot be blank")
     @Size(min = 2, max = 50, message = "the name should be in range (2, 50) characters")
     private String title;
+
     private LocalDate publishedDate;
-//    private Long authorId; // ID of the author
+
+    @NotNull(message = "Author id cannot be null. Please enter a valid author id")
+    private Long authorId;
 }

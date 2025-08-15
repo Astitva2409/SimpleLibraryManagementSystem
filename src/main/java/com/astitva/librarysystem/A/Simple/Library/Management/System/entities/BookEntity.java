@@ -2,7 +2,6 @@ package com.astitva.librarysystem.A.Simple.Library.Management.System.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Entity

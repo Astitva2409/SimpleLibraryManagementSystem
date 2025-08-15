@@ -1,17 +1,13 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.controller;
 
 import com.astitva.librarysystem.A.Simple.Library.Management.System.dto.AuthorDTO;
-import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceNotFoundException;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -27,8 +23,9 @@ public class AuthorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AuthorDTO>> getAllAuthors() {
-        return ResponseEntity.ok(authorService.getAllAuthors());
+    public ResponseEntity<List<AuthorDTO>> getAllAuthors(@RequestParam(defaultValue = "id") String sortBy,
+                                                         @RequestParam(defaultValue = "0") Integer pageNumber) {
+        return ResponseEntity.ok(authorService.getAllAuthors(sortBy, pageNumber));
     }
 
     @GetMapping(path = "{id}")

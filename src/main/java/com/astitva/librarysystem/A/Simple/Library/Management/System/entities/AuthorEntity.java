@@ -4,7 +4,6 @@ import com.astitva.librarysystem.A.Simple.Library.Management.System.utils.Gender
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Entity
