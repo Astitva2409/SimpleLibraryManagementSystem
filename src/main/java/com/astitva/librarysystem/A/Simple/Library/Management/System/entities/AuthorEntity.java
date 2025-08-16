@@ -4,7 +4,6 @@ import com.astitva.librarysystem.A.Simple.Library.Management.System.utils.Gender
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Entity
@@ -26,7 +25,7 @@ public class AuthorEntity {
     @Enumerated(value = EnumType.STRING)
     private GenderType gender;
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<BookEntity> books;
 }

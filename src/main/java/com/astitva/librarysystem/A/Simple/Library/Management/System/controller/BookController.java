@@ -1,15 +1,12 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.controller;
 
 import com.astitva.librarysystem.A.Simple.Library.Management.System.dto.BookDTO;
-import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.BookEntity;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -21,14 +18,15 @@ public class BookController {
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<BookDTO> createNewBook(@RequestBody @Valid BookDTO inputAuthor) {
-        BookDTO bookDTO = bookService.createNewBook(inputAuthor);
+    public ResponseEntity<BookDTO> createNewBook(@RequestBody @Valid BookDTO inputBook) {
+        BookDTO bookDTO = bookService.createNewBook(inputBook);
         return new ResponseEntity<>(bookDTO, HttpStatus.CREATED);
     }
     
     @GetMapping
-    public ResponseEntity<List<BookDTO>> getAllBooks() {
-        return ResponseEntity.ok(bookService.getAllBooks());
+    public ResponseEntity<List<BookDTO>> getAllBooks(@RequestParam(defaultValue = "id") String sortBy,
+                                                     @RequestParam(defaultValue = "0") Integer pageNumber) {
+        return ResponseEntity.ok(bookService.getAllBooks(sortBy, pageNumber));
     }
 
     @GetMapping(path = "/{id}")
@@ -38,8 +36,10 @@ public class BookController {
     }
 
     @GetMapping(path = "/searchByTitle")
-    public ResponseEntity<List<BookDTO>> getBooksByTitle(@RequestParam String title) {
-        return ResponseEntity.ok(bookService.getBooksByTitle(title));
+    public ResponseEntity<List<BookDTO>> getBooksByTitle(@RequestParam String title,
+                                                         @RequestParam(defaultValue = "id") String sortBy,
+                                                         @RequestParam(defaultValue = "0") Integer pageNumber) {
+        return ResponseEntity.ok(bookService.getBooksByTitle(title, sortBy, pageNumber));
     }
 
     @GetMapping(path = "/searchBooksAfterDate")
@@ -47,10 +47,15 @@ public class BookController {
         return ResponseEntity.ok(bookService.getAllBooksPublishedAfterDate(date));
     }
 
+    @GetMapping(path = "/by-author")
+    public ResponseEntity<List<BookDTO>> getBooksByAuthor(@RequestParam String name) {
+        return ResponseEntity.ok(bookService.getBooksByAuthor(name));
+    }
+
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Boolean> deleteBookById(@PathVariable Long id) {
-        boolean isDeleted = bookService.deleteBookById(id);
-        return ResponseEntity.ok(isDeleted);
+    public ResponseEntity<Object> deleteBookById(@PathVariable Long id) {
+        Object deleted = bookService.deleteBookById(id);
+        return ResponseEntity.ok(deleted);
     }
 
     @PutMapping(path = "/{id}")
