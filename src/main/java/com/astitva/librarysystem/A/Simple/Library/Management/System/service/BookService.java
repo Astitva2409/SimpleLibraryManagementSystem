@@ -1,8 +1,10 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.service;
 
+import com.astitva.librarysystem.A.Simple.Library.Management.System.advices.ApiResponse;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.dto.BookDTO;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.AuthorEntity;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.BookEntity;
+import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceAlreadyPresentException;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceNotFoundException;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +26,18 @@ public class BookService {
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
     private final AuthorService authorService;
-    private final int PAGE_SIZE = 10;
+    private final int PAGE_SIZE = 5;
 
     public BookEntity findBookById(Long id) {
         boolean exists = bookRepository.existsById(id);
         if(!exists) throw new ResourceNotFoundException("Book not found with id "+id);
         return bookRepository.findById(id).get();
+    }
+
+    public void findBookByName(String title) {
+        BookEntity bookEntity = bookRepository.findByTitle(title);
+        if (bookEntity != null)
+            throw new ResourceAlreadyPresentException("Book already exists with the given name: "+title);
     }
 
     public Pageable getPageableAndSorting(String sortBy, Integer pageNumber) {
@@ -40,6 +48,7 @@ public class BookService {
 
     public BookDTO createNewBook(BookDTO inputBook) {
         authorService.findByAuthorId(inputBook.getAuthorId());
+        findBookByName(inputBook.getTitle());
         BookEntity bookEntity = modelMapper.map(inputBook, BookEntity.class);
         BookEntity savedBookEntity = bookRepository.save(bookEntity);
         return modelMapper.map(savedBookEntity, BookDTO.class);
@@ -48,6 +57,8 @@ public class BookService {
     public List<BookDTO> getAllBooks(String sortBy, Integer pageNumber) {
         Pageable pageable = getPageableAndSorting(sortBy, pageNumber);
         List<BookEntity> bookEntities = bookRepository.findAll(pageable).getContent();
+        if (bookEntities.isEmpty())
+            throw new ResourceNotFoundException("No Books were found");
         return bookEntities
                 .stream()
                 .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class))
@@ -59,9 +70,11 @@ public class BookService {
         return modelMapper.map(bookEntity, BookDTO.class);
     }
 
-    public boolean deleteBookById(Long id) {
+    public Object deleteBookById(Long id) {
+        findBookById(id);
         bookRepository.deleteById(id);
-        return true;
+//        return "Book with id: "+id+" is deleted successfully";
+        return new ApiResponse<Object>("Book with id: " + id + " is deleted successfully");
     }
 
     public BookDTO updateBookById(Map<String, Object> updates, Long id) {
@@ -104,6 +117,18 @@ public class BookService {
         List<BookEntity> bookEntities = bookRepository.findByPublishedDateGreaterThanAndEquals(date);
         if (bookEntities.isEmpty())
             throw new ResourceNotFoundException("No books were published after the given date: "+date);
+        return bookEntities
+                .stream()
+                .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<BookDTO> getBooksByAuthor(String authorName) {
+        AuthorEntity authorEntity = authorService.findByAuthorName(authorName);
+        if (authorEntity == null) throw new ResourceNotFoundException("Author not found with name "+authorName);
+        List<BookEntity> bookEntities = bookRepository.findByAuthorId(authorEntity.getId());
+        if (bookEntities.isEmpty())
+            throw new ResourceNotFoundException("Books not found with author name: "+authorName);
         return bookEntities
                 .stream()
                 .map(bookEntity -> modelMapper.map(bookEntity, BookDTO.class))

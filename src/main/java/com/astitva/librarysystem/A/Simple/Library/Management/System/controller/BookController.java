@@ -47,10 +47,15 @@ public class BookController {
         return ResponseEntity.ok(bookService.getAllBooksPublishedAfterDate(date));
     }
 
+    @GetMapping(path = "/by-author")
+    public ResponseEntity<List<BookDTO>> getBooksByAuthor(@RequestParam String name) {
+        return ResponseEntity.ok(bookService.getBooksByAuthor(name));
+    }
+
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Boolean> deleteBookById(@PathVariable Long id) {
-        boolean isDeleted = bookService.deleteBookById(id);
-        return ResponseEntity.ok(isDeleted);
+    public ResponseEntity<Object> deleteBookById(@PathVariable Long id) {
+        Object deleted = bookService.deleteBookById(id);
+        return ResponseEntity.ok(deleted);
     }
 
     @PutMapping(path = "/{id}")

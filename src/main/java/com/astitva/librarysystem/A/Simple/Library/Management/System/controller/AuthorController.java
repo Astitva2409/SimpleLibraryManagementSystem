@@ -40,10 +40,9 @@ public class AuthorController {
     }
 
     @DeleteMapping(path = "{id}")
-    public ResponseEntity<Boolean> deleteAuthorById(@PathVariable Long id) {
-        boolean isDeleted = authorService.deleteAuthorById(id);
-//        if (!isDeleted) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(isDeleted);
+    public ResponseEntity<Object> deleteAuthorById(@PathVariable Long id) {
+        Object deleted = authorService.deleteAuthorById(id);
+        return ResponseEntity.ok(deleted);
     }
 
     @PutMapping(path = "/{id}")

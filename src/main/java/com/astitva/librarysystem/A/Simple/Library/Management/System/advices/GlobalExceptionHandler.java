@@ -1,5 +1,6 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.advices;
 
+import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceAlreadyPresentException;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleResourceNotFound(ResourceNotFoundException exception) {
         ApiError apiError = ApiError.builder()
                 .status(HttpStatus.NOT_FOUND)
+                .message(exception.getMessage())
+                .build();
+        return buildResponseEntity(apiError);
+    }
+
+    @ExceptionHandler(ResourceAlreadyPresentException.class)
+    public ResponseEntity<ApiResponse<?>> handleResourceAlreadyPresentException(ResourceAlreadyPresentException exception) {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.BAD_REQUEST)
                 .message(exception.getMessage())
                 .build();
         return buildResponseEntity(apiError);

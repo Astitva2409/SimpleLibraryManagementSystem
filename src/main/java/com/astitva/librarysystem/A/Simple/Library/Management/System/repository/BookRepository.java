@@ -1,5 +1,6 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.repository;
 
+import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.AuthorEntity;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.BookEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,8 @@ public interface BookRepository extends JpaRepository<BookEntity, Long> {
 
     @Query("SELECT b FROM BookEntity b WHERE b.publishedDate >= :date")
     List<BookEntity> findByPublishedDateGreaterThanAndEquals(LocalDate date);
+
+    List<BookEntity> findByAuthorId(Long id);
+
+    BookEntity findByTitle(String title);
 }

@@ -25,7 +25,7 @@ public class AuthorEntity {
     @Enumerated(value = EnumType.STRING)
     private GenderType gender;
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", orphanRemoval = true, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<BookEntity> books;
 }

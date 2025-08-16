@@ -1,5 +1,6 @@
 package com.astitva.librarysystem.A.Simple.Library.Management.System.service;
 
+import com.astitva.librarysystem.A.Simple.Library.Management.System.advices.ApiResponse;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.dto.AuthorDTO;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.entities.AuthorEntity;
 import com.astitva.librarysystem.A.Simple.Library.Management.System.exceptions.ResourceNotFoundException;
@@ -22,7 +23,7 @@ public class AuthorService {
 
     private final AuthorRepository authorRepository;
     private final ModelMapper modelMapper;
-    private final int PAGE_SIZE = 10;
+    private final int PAGE_SIZE = 5;
 
     public AuthorEntity findByAuthorId(Long id) {
         boolean exists = authorRepository.existsById(id);
@@ -45,6 +46,8 @@ public class AuthorService {
     public List<AuthorDTO> getAllAuthors(String sortBy, Integer pageNumber) {
         Pageable pageable = getPageableAndSorting(sortBy, pageNumber);
         List<AuthorEntity> authorEntities = authorRepository.findAll(pageable).getContent();
+        if (authorEntities.isEmpty())
+            throw new ResourceNotFoundException("No Authors were found");
         return authorEntities
                 .stream()
                 .map(authorEntity -> modelMapper.map(authorEntity, AuthorDTO.class))
@@ -56,10 +59,10 @@ public class AuthorService {
         return modelMapper.map(authorEntity, AuthorDTO.class);
     }
 
-    public boolean deleteAuthorById(Long id) {
+    public Object deleteAuthorById(Long id) {
         findByAuthorId(id);
         authorRepository.deleteById(id);
-        return true;
+        return new ApiResponse<Object>("Author with id: "+id+" is deleted successfully");
     }
 
     public AuthorDTO updateAuthorById(Map<String, Object> updates, Long id) {
@@ -88,5 +91,9 @@ public class AuthorService {
                 .stream()
                 .map(authorEntity -> modelMapper.map(authorEntity, AuthorDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    public AuthorEntity findByAuthorName(String authorName) {
+        return authorRepository.findByName(authorName);
     }
 }
