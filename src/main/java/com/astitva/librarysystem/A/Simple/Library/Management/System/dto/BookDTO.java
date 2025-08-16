@@ -19,6 +19,8 @@ public class BookDTO {
     @Size(min = 2, max = 50, message = "the name should be in range (2, 50) characters")
     private String title;
 
+    @NotNull(message = "The name cannot be null")
+    @NotBlank(message = "The name cannot be blank")
     private LocalDate publishedDate;
 
     @NotNull(message = "Author id cannot be null. Please enter a valid author id")
